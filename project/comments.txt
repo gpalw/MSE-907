@@ -1,0 +1,30 @@
+upload image
+# springboot-api
+docker build -t springboot-api:latest .
+docker tag springboot-api:latest 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com/springboot-api:latest
+docker push 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com/springboot-api:latest
+
+
+# inference-service
+docker build -t inference-service:latest .
+docker tag inference-service:latest 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com/inference-service:latest
+docker push 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com/inference-service:latest
+
+# streamlit-ui
+docker build -t streamlit-ui:latest .
+docker tag streamlit-ui:latest 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com/streamlit-ui:latest
+docker push 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com/streamlit-ui:latest
+
+
+
+Updae Image
+# ALL
+docker-compose pull
+
+# streamlit-ui
+docker-compose pull streamlit-ui
+docker-compose up -d streamlit-ui
+
+# springboot-api
+docker-compose pull springboot-api
+docker-compose up -d springboot-api

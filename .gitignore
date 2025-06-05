@@ -1,3 +1,10 @@
 data/processed
 data/raw
 record/week-2/processed
+project/python/python-service/.venv
+project/python/python-service/lightning_logs
+project/python-service/.venv
+project/python-service/lightning_logs
+project/python-service/tft_checkpoints
+project/python-service/tmp
+project/python-service/__pycache__

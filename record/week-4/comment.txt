@@ -1,0 +1,23 @@
+创建 IAM 用户/角色
+ Service Role
+
+用途	托管策略名称	策略 ARN
+S3 全读写	AmazonS3FullAccess	arn:aws:iam::aws:policy/AmazonS3FullAccess
+ECR 镜像推拉	AmazonEC2ContainerRegistryFullAccess	arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
+ECS/Fargate 启停任务	AmazonECS_FullAccess	arn:aws:iam::aws:policy/AmazonECS_FullAccess
+CloudWatch 日志写入（可选）	CloudWatchLogsFullAccess	arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+
+
+
+创建 S3 Bucket
+web-forecast-data
+
+
+
+
+E:\Yoobee\MSE907\Github\record\week-4>aws s3 cp test.csv s3://web-forecast-data/test.csv
+upload: .\test.csv to s3://web-forecast-data/test.csv
+
+
+
+aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com

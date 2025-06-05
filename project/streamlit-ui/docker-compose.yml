@@ -1,0 +1,12 @@
+# docker-compose.yml
+services:
+  streamlit-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: streamlit-ui:latest
+    container_name: streamlit-ui
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://localhost:8080/api

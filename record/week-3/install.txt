@@ -1,0 +1,1 @@
+pip install pandas numpy pytorch-lightning pytorch-forecasting torch

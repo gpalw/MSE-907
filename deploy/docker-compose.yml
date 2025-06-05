@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  inference-service:
+    image: inference-service:latest
+    ports:
+      - "8000"
+    environment:
+      - S3_BUCKET=web-forecast-data
+      - AWS_ACCESS_KEY_ID=#Yours
+      - AWS_SECRET_ACCESS_KEY=#Yours
+
+  springboot-api:
+    image: springboot-api:latest
+    ports:
+      - "8080"
+    environment:
+      - S3_BUCKET=web-forecast-data
+    volumes:
+      - ~/.aws:/root/.aws:ro
+
+  streamlit-ui:
+    image: streamlit-ui:latest
+    ports:
+      - "8501"
+    environment:
+      - API_URL=http://nginx/api
+      # 如果需要和 inference-service 通信，可以再加类似配置
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - streamlit-ui
+      - springboot-api
+      - inference-service
