@@ -1,8 +1,9 @@
 version: '3.8'
 
 services:
-  inference-service:
-    image: inference-service:latest
+  python-service:
+    build: ../project/python-service
+    image: python-service-app:latest
     ports:
       - "8000"
     environment:
@@ -10,8 +11,9 @@ services:
       - AWS_ACCESS_KEY_ID=#Yours
       - AWS_SECRET_ACCESS_KEY=#Yours
 
-  springboot-api:
-    image: springboot-api:latest
+  forecasting-platform:
+    build: ../project/forecasting-platform
+    image: forecasting-platform-app:latest
     ports:
       - "8080"
     environment:
@@ -20,7 +22,8 @@ services:
       - ~/.aws:/root/.aws:ro
 
   streamlit-ui:
-    image: streamlit-ui:latest
+    build: ../project/streamlit-ui
+    image: streamlit-ui-app:latest
     ports:
       - "8501"
     environment:
@@ -35,5 +38,5 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - streamlit-ui
-      - springboot-api
-      - inference-service
+      - forecasting-platform
+      - python-service

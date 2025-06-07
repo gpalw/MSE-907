@@ -6,11 +6,19 @@ WORKDIR /app
 
 # 3. Copy and install dependencies
 COPY requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+#RUN pip install --upgrade pip && \
+#    pip install --no-cache-dir -r requirements.txt
 
-# 4. Copy your FastAPI app code into the image
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir \
+      --extra-index-url https://download.pytorch.org/whl/cpu \
+      -r requirements.txt
+
+
+
+# 4. Copy your FastAPI app,prediction code into the image
 COPY app.py .
+COPY prediction.py .
 
 # 5. Tell Docker how to start the service
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

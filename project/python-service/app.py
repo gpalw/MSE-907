@@ -76,22 +76,32 @@ def fetch_csv_cached(key: str) -> pd.DataFrame:
 # ──────────────────────────────────────────────────────────────────────────
 @router.get("/predict")
 def predict(key: str, horizon: int = 7):
+    print(f"==[预测接口调用]== key={key} horizon={horizon}")
     """
     读取用户 CSV → 预处理 → DTW 相似度判断 → 选择模型 → 预测未来 N 天。
     """
     # Step 1: 加载数据
     df = fetch_csv_cached(key)
+    print(f"[Step1] 读取到 {len(df)} 行, 列名: {df.columns.tolist()}")
 
+    print("[Step1] 校验历史数据...")
     validate_history(df)
+    print("[Step1] 校验通过")
 
     # Step 2: 数据预处理 + DTW 判断
+    print("[Step2] 预处理 + DTW")
     preprocessed_df, can_use_tft = preprocess_data(df)
+    print(f"[Step2] 预处理结果: {preprocessed_df.shape}，can_use_tft={can_use_tft}")
 
     # Step 3: 根据 DTW 选择模型
+    print("[Step3] 选择模型")
     model, model_type = select_model(can_use_tft)
+    print(f"[Step3] 使用模型: {model_type}")
 
     # Step 4: 执行预测
+    print("[Step4] 执行预测")
     preds = predict_sales(model, preprocessed_df, steps=horizon, model_type=model_type)
+    print(f"[Step4] model_type：{model_type}， 预测完成: {preds}")
 
     return {
         "model_used": model_type,  # "TFT" or "Fallback"

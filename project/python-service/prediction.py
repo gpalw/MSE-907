@@ -109,9 +109,23 @@ class MovingAverageFallback:
     def __init__(self, window: int = 7):
         self.window = window
 
-    def predict(self, series: np.ndarray, steps: int):
-        mean = float(series[-self.window :].mean())
-        return [mean] * steps
+    # def predict(self, series: np.ndarray, steps: int):
+    #    mean = float(series[-self.window :].mean())
+    #     return [mean] * steps
+
+    def predict(self, series, steps, window=7):
+        # 处理空数据情况
+        if len(series) == 0:
+            return [0] * steps
+
+        # 自适应窗口大小：取可用数据和默认窗口的最小值
+        actual_window = min(len(series), window)
+
+        # 计算移动平均（考虑最后actual_window天的数据）
+        avg = np.mean(series[-actual_window:])
+
+        # 确保非负预测（销售不能为负）
+        return [max(0, avg)] * steps
 
 
 def load_fallback_model():
@@ -287,23 +301,6 @@ def _predict_single_store(
             df["unit_sales"].to_numpy(), steps
         )
         return {"store_id": store_id, "forecast": fallback_pred}
-
-
-# 回退策略实现
-class MovingAverageFallback:
-    def predict(self, series, steps, window=7):
-        # 处理空数据情况
-        if len(series) == 0:
-            return [0] * steps
-
-        # 自适应窗口大小：取可用数据和默认窗口的最小值
-        actual_window = min(len(series), window)
-
-        # 计算移动平均（考虑最后actual_window天的数据）
-        avg = np.mean(series[-actual_window:])
-
-        # 确保非负预测（销售不能为负）
-        return [max(0, avg)] * steps
 
 
 def check(df: pd.DataFrame) -> None:

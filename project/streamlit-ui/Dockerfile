@@ -6,6 +6,7 @@ RUN pip install --upgrade pip \
  && pip install --no-cache-dir -r requirements.txt
 
 COPY app.py .
+COPY assets/ ./assets/
 
 ENV API_URL=http://nginx/api
 EXPOSE 8501

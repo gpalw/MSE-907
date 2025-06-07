@@ -14,7 +14,7 @@ st.set_page_config("SME Forecast UI")
 st.title("SME Sales Forecasting")
 
 # 计算 assets 目录的绝对路径（保证在任何工作目录都能找到）
-ASSETS_DIR = Path(__file__).parent / "assets"
+ASSETS_DIR = Path(__file__).resolve().parent / "assets"
 DEMO_RETAIL_FILE_NAME = "demo_retail_item_store.csv"
 TEMPLATE_PATH = ASSETS_DIR / DEMO_RETAIL_FILE_NAME
 
@@ -91,26 +91,6 @@ def render_forecast_view(py_info: dict) -> None:
 
 
 uploaded = st.file_uploader("Upload your sales CSV", type=["csv"])
-# if uploaded:
-# st.info("Uploading to server…")
-# files = {"file": (uploaded.name, uploaded.getvalue(), "text/csv")}
-# try:
-#     resp = requests.post(f"{API_URL}/upload", files=files, timeout=120)
-#     resp.raise_for_status()
-# except Exception as e:
-#     st.error(f"Upload failed: {e}")
-# else:
-#     data = resp.json()
-#     st.success(f"File stored at S3 key: `{data['s3Key']}`")
-
-#     st.write("Python service returned:")
-#     # display the returned data
-#     # st.json(data["pythonInfo"])
-
-#     render_forecast_view(data["pythonInfo"])
-#     # if you later add a /predict endpoint, you can call it here:
-#     # pred = requests.get(f"{API_URL}/predict?key={data['s3Key']}").json()
-#     # st.write(pred)
 
 if uploaded:
     try:
