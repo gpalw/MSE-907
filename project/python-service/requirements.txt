@@ -8,6 +8,6 @@ scipy                     # TFT 里 dtw、metrics 依赖
 fastapi
 uvicorn[standard]
 boto3
-numpy
+numpy==1.26.*
 pandas
 dtaidistance

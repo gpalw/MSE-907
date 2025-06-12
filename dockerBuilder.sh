@@ -7,7 +7,7 @@ PROJECT_DIR="${SCRIPT_DIR}/project"         # 如果你的目录名不是 projec
 PROJECTS=(python-service forecasting-platform streamlit-ui)
 
 # ───── 其他变量（保持不变，可按需覆盖）─────
-ACCOUNT_ID="AKIA46ZDFRKHWONBFKXR"
+ACCOUNT_ID="890742606479"
 REGION="ap-southeast-2"
 TAG="latest"
 PUSH=false

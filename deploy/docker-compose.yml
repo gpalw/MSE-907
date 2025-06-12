@@ -28,7 +28,6 @@ services:
       - "8501"
     environment:
       - API_URL=http://nginx/api
-      # 如果需要和 inference-service 通信，可以再加类似配置
 
   nginx:
     image: nginx:alpine

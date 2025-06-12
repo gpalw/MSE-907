@@ -20,5 +20,11 @@ RUN pip install --upgrade pip && \
 COPY app.py .
 COPY prediction.py .
 
+COPY retail_item_store.csv .
+
+
+RUN mkdir -p /app/tmp
+COPY tft_lightning_model.ckpt /app/tmp/tft_lightning_model.ckpt
+
 # 5. Tell Docker how to start the service
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
