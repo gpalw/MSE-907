@@ -7,18 +7,18 @@ from pytorch_forecasting.data import GroupNormalizer
 from pytorch_forecasting.metrics import MAE
 import os
 
-# ------------------ 参数 ------------------
+# ------------------ Parameters ------------------
 CSV_PATH = r"E:\Yoobee\MSE907\Github\data\processed\retail\retail_item_store.csv"
 ENCODER_LENGTH = 14
 DECODER_LENGTH = 7
 BATCH_SIZE = 64
 EPOCHS = 20
 LR = 1e-3
-N_STORES = 10  # 调试时只选取10个门店的数据
+N_STORES = 10  # Only select 10 stores for debugging
 
-print("🚀 启动内存优化训练脚本…")
+print("🚀 Starting memory-optimized training script…")
 
-# ------------------ 1. 采样门店ID ------------------
+# ------------------ 1. Sample Store IDs ------------------
 store_ids = set()
 for chunk in pd.read_csv(
     CSV_PATH, usecols=["store_id"], dtype={"store_id": "str"}, chunksize=500000
@@ -27,9 +27,9 @@ for chunk in pd.read_csv(
     if len(store_ids) >= N_STORES:
         break
 store_ids = list(store_ids)[:N_STORES]
-print("采样门店:", store_ids)
+print("Sampled stores:", store_ids)
 
-# ------------------ 2. 分块读取主数据 ------------------
+# ------------------ 2. Read main data in chunks ------------------
 dfs = []
 for chunk in pd.read_csv(
     CSV_PATH,
@@ -40,12 +40,12 @@ for chunk in pd.read_csv(
 ):
     dfs.append(chunk[chunk["store_id"].isin(store_ids)])
 df = pd.concat(dfs, ignore_index=True)
-print(f"采样后 shape: {df.shape}")
+print(f"Shape after sampling: {df.shape}")
 
-# 1.1 按日聚合
+# 1.1 Aggregate by day
 df_agg = df.groupby(["store_id", "date"], as_index=False)["unit_sales"].sum()
 
-# 1.2 补全日期
+# 1.2 Fill missing dates
 all_dates = pd.date_range(df_agg.date.min(), df_agg.date.max(), freq="D")
 idx = pd.MultiIndex.from_product(
     [df_agg.store_id.unique(), all_dates], names=["store_id", "date"]
@@ -53,7 +53,7 @@ idx = pd.MultiIndex.from_product(
 df_full = df_agg.set_index(["store_id", "date"]).reindex(idx).fillna(0).reset_index()
 df_full["time_idx"] = (df_full["date"] - df_full["date"].min()).dt.days
 
-# 1.3 数据过滤
+# 1.3 Data filtering
 MIN_DAYS = ENCODER_LENGTH + DECODER_LENGTH + 10
 MIN_SALES = 1
 
@@ -66,14 +66,14 @@ for sid, g in df_full.groupby("store_id"):
 if frames:
     df_final = pd.concat(frames, ignore_index=True)
 else:
-    print("❌ 没有符合条件的门店数据！")
+    print("❌ No store data meets the requirements!")
     exit()
 
-print(f"✅ 数据统计:")
-print(f"   ‣ 最终样本 shape: {df_final.shape}")
-print(f"   ‣ 门店数: {df_final.store_id.nunique()}")
-print(f"   ‣ 时间跨度: {df_final.time_idx.max() - df_final.time_idx.min() + 1} 天")
-print(f"   ‣ 总销售额: {df_final.unit_sales.sum():,.0f}")
+print(f"✅ Data statistics:")
+print(f"   ‣ Final sample shape: {df_final.shape}")
+print(f"   ‣ Number of stores: {df_final.store_id.nunique()}")
+print(f"   ‣ Time span: {df_final.time_idx.max() - df_final.time_idx.min() + 1} days")
+print(f"   ‣ Total sales: {df_final.unit_sales.sum():,.0f}")
 
 # ------------------ 3. TimeSeriesDataSet ------------------
 training = TimeSeriesDataSet(
@@ -96,10 +96,10 @@ training = TimeSeriesDataSet(
     allow_missing_timesteps=True,
 )
 
-print(f"📈 训练集大小: {len(training):,} 样本")
+print(f"📈 Training set size: {len(training):,} samples")
 
 bad_count = sum(1 for i in range(min(1000, len(training))) if training[i] is None)
-print(f"⚠️ 前1000个样本中坏样本数: {bad_count}")
+print(f"⚠️ Number of bad samples in the first 1000: {bad_count}")
 
 train_loader = training.to_dataloader(
     train=True,
@@ -108,9 +108,9 @@ train_loader = training.to_dataloader(
     num_workers=0,
 )
 
-print(f"🏋️ 训练批次数: {len(train_loader)}")
+print(f"🏋️ Number of training batches: {len(train_loader)}")
 
-# ------------------ 4. 小型TFT模型 ------------------
+# ------------------ 4. Small TFT Model ------------------
 tft = TemporalFusionTransformer.from_dataset(
     training,
     learning_rate=LR,
@@ -126,12 +126,12 @@ tft = TemporalFusionTransformer.from_dataset(
 
 total_params = sum(p.numel() for p in tft.parameters())
 trainable_params = sum(p.numel() for p in tft.parameters() if p.requires_grad)
-print(f"🔧 模型参数:")
-print(f"   ‣ 总参数量: {total_params:,}")
-print(f"   ‣ 可训练参数量: {trainable_params:,}")
-print(f"   ‣ 预估模型大小: {trainable_params * 4 / 1024 / 1024:.1f} MB (float32)")
+print(f"🔧 Model parameters:")
+print(f"   ‣ Total parameters: {total_params:,}")
+print(f"   ‣ Trainable parameters: {trainable_params:,}")
+print(f"   ‣ Estimated model size: {trainable_params * 4 / 1024 / 1024:.1f} MB (float32)")
 
-# ------------------ 5. 训练 ------------------
+# ------------------ 5. Training ------------------
 trainer = L.Trainer(
     max_epochs=EPOCHS,
     accelerator="gpu" if torch.cuda.is_available() else "cpu",
@@ -142,10 +142,10 @@ trainer = L.Trainer(
     default_root_dir="./tft_checkpoints",
 )
 
-print("🚀 开始训练...")
+print("🚀 Starting training...")
 trainer.fit(tft, train_dataloaders=train_loader)
 
-# ------------------ 6. 保存 ------------------
+# ------------------ 6. Save ------------------
 torch.save(
     {
         "model_state_dict": tft.state_dict(),
@@ -161,4 +161,4 @@ for filename in ["tft_complete_model.pt", "tft_lightning_model.ckpt"]:
         size = os.path.getsize(filename)
         print(f"💾 {filename}: {size:,} bytes ({size/1024/1024:.1f} MB)")
 
-print("🎉 训练完成！")
+print("🎉 Training complete!")

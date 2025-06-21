@@ -1,0 +1,38 @@
+  python-service:
+    build: ../project/python-service
+    image: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/python-service-app:latest"
+    ports:
+      - "8000"
+    environment:
+      - S3_BUCKET=web-forecast-data
+      - AWS_ACCESS_KEY_ID=#Your-Key
+      - AWS_SECRET_ACCESS_KEY=#Your-Access-Key
+
+  forecasting-platform:
+    build: ../project/forecasting-platform
+    image: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/forecasting-platform-app:latest"
+    ports:
+      - "8080"
+    environment:
+      - S3_BUCKET=web-forecast-data
+    volumes:
+      - ~/.aws:/root/.aws:ro
+
+  streamlit-ui:
+    build: ../project/streamlit-ui
+    image: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/streamlit-ui-app:latest"
+    ports:
+      - "8501"
+    environment:
+      - API_URL=http://nginx/api
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - streamlit-ui
+      - forecasting-platform
+      - python-service

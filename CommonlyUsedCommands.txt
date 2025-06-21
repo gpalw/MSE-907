@@ -1,0 +1,46 @@
+## logs ## 
+docker compose logs -f nginx
+docker compose logs -f streamlit-ui
+docker compose logs -f python-service
+docker compose logs -f forecasting-platform
+
+
+upload image
+# forecasting-platform-app
+docker build -t forecasting-platform-app:latest .
+docker tag forecasting-platform-app:latest 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com/forecasting-platform-app:latest
+docker push 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com/forecasting-platform-app:latest
+
+
+# python-service-app
+docker build -t python-service-app:latest .
+docker tag python-service-app:latest 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com/python-service-app:latest
+docker push 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com/python-service-app:latest
+
+# streamlit-ui
+docker build -t streamlit-ui:latest .
+docker tag streamlit-ui:latest 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com/streamlit-ui:latest
+docker push 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com/streamlit-ui:latest
+
+
+
+Updae Image
+# ALL
+docker-compose pull
+
+# streamlit-ui
+docker-compose pull streamlit-ui
+docker-compose up -d streamlit-ui
+
+# forecasting-platform-app
+docker-compose pull forecasting-platform-app
+docker-compose up -d forecasting-platform-app
+
+aws ecr get-login-password --region ap-southeast-2 | \
+docker login --username AWS --password-stdin 890742606479.dkr.ecr.ap-southeast-2.amazonaws.com
+
+
+#log
+docker-compose logs -f forecasting-platform
+docker-compose logs -f python-service
+docker-compose logs -f streamlit-ui

@@ -1,10 +1,8 @@
-# requirements-tft.txt   ──≈ 350 MB(解压)
+# requirements-tft.txt   ──≈ 350 MB
 torch==2.1.2+cpu          --extra-index-url https://download.pytorch.org/whl/cpu
 pytorch-lightning<2.2
 pytorch-forecasting
-scipy                     # TFT 里 dtw、metrics 依赖
-# -------------------------------
-# requirements-base.txt  ──≈  90 MB(解压)
+scipy
 fastapi
 uvicorn[standard]
 boto3

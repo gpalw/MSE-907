@@ -7,7 +7,7 @@ RUN pip install --upgrade pip \
 
 COPY app.py .
 COPY assets/ ./assets/
-
+COPY .streamlit/ ./.streamlit/
 ENV API_URL=http://nginx/api
 EXPOSE 8501
 CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
