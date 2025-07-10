@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ───── ① 关键：计算 project 根目录 ─────
+# ───── ① Key: Calculate the root directory of the project ─────
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PROJECT_DIR="${SCRIPT_DIR}/project"         # 如果你的目录名不是 project，请改这里
+PROJECT_DIR="${SCRIPT_DIR}/project"         # If your folder name is not 'project', modify here
 PROJECTS=(python-service forecasting-platform streamlit-ui)
 
-# ───── 其他变量（保持不变，可按需覆盖）─────
+# ───── Other variables (remain unchanged, can be overridden as needed) ─────
 ACCOUNT_ID="890742606479"
 REGION="ap-southeast-2"
 TAG="latest"
 PUSH=false
 
-# ───── ② 命令行参数解析（略）─────
+# ───── ② Command-line argument parsing (omitted details) ─────
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --push)    PUSH=true ;;
     --region)  REGION="$2";  shift ;;
     --account) ACCOUNT_ID="$2"; shift ;;
-    --project-dir) PROJECT_DIR="$2"; shift ;;   # 如需手动指定
+    --project-dir) PROJECT_DIR="$2"; shift ;;   # Use this to specify manually if needed
     *) echo "Unknown arg $1"; exit 1 ;;
   esac
   shift
@@ -26,15 +26,15 @@ done
 
 ECR_BASE="${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com"
 
-# ───── ③ 如需推送，先登录 ECR（同前）─────
+# ───── ③ If push is required, login to ECR first (same as before) ─────
 if $PUSH; then
   aws ecr get-login-password --region "$REGION" |
     docker login --username AWS --password-stdin "$ECR_BASE"
 fi
 
-# ───── ④ 循环构建/推送 ─────
+# ───── ④ Loop for build/push ─────
 for PROJ in "${PROJECTS[@]}"; do
-  SRC_PATH="${PROJECT_DIR}/${PROJ}"      # ★ 路径已改为绝对
+  SRC_PATH="${PROJECT_DIR}/${PROJ}"      # ★ The path has been changed to absolute
   IMAGE_LOCAL="${PROJ}-app:${TAG}"
 
   echo "🚧 Building $SRC_PATH -> $IMAGE_LOCAL"

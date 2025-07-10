@@ -3,7 +3,7 @@ from pathlib import Path
 import streamlit as st
 import requests
 import pandas as pd
-import hashlib
+import altair as alt
 from typing import Dict, Any
 
 # Will read from environment in Docker or use local default
@@ -51,7 +51,37 @@ with st.sidebar:
             help="Sample format",
         )
 
+
 # ================= Main Area: File Upload =================
+def displayPlot(df_pred: pd.DataFrame, choice: str):
+    if choice == "All Items":
+        chart_df = df_pred.melt(
+            id_vars=["step"], var_name="store_id", value_name="forecast"
+        )
+        chart = (
+            alt.Chart(chart_df)
+            .mark_line()
+            .encode(
+                x=alt.X("step:O", title="Prediction Step"),
+                y=alt.Y("forecast:Q", title="Predicted Sales"),
+                color=alt.Color("store_id:N", title="Store ID"),
+            )
+            .properties(height=350)
+        )
+        st.altair_chart(chart, use_container_width=True)
+    else:
+        chart_df = df_pred[["step", choice]]
+        chart_df = chart_df.rename(columns={choice: "forecast"})
+        chart = (
+            alt.Chart(chart_df)
+            .mark_line()
+            .encode(
+                x=alt.X("step:O", title="Prediction Step"),
+                y=alt.Y("forecast:Q", title="Predicted Sales"),
+            )
+            .properties(height=350)
+        )
+        st.altair_chart(chart, use_container_width=True)
 
 
 def render_forecast_view(py_info: dict) -> None:
@@ -72,13 +102,19 @@ def render_forecast_view(py_info: dict) -> None:
 
     # 3️⃣ Store selection
     store_ids = df_pred.columns.drop("step").tolist()
-    choice = st.selectbox("Select View Prediction Point", ["All Items"] + store_ids)
+
+    store_id_options = [("All Items", "All Items")] + [
+        (f"storeId: {sid}", sid) for sid in store_ids
+    ]
+
+    selected_label = st.selectbox(
+        "Select View Prediction Point", [label for label, _ in store_id_options]
+    )
+
+    choice = dict(store_id_options)[selected_label]
 
     # 4️⃣ Plot
-    if choice == "All Items":
-        st.line_chart(df_pred.set_index("step"), height=350)
-    else:
-        st.line_chart(df_pred.set_index("step")[[choice]], height=350)
+    displayPlot(df_pred, choice)
 
     # 5️⃣ Download button (optional)
     st.download_button(
